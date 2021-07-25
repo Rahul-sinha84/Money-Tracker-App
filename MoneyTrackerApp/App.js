@@ -35,6 +35,7 @@ const ofMonthlyExpenses = () => (
     <Stack.Screen name="MonthScreen" component={MonthScreen} />
     <Stack.Screen name="CreateExpenseScreen" component={CreateExpenseScreen} />
     <Stack.Screen name="EditMonthScreen" component={EditMonthScreen} />
+    <Stack.Screen name="editExpenseScreen" component={EditExpenseScreen} />
   </Stack.Navigator>
 );
 
@@ -87,7 +88,6 @@ const App = ({userData}) => {
             />
           </>
         )}
-        {/* <Stack.Screen name="editExpenseScreen" component={EditExpenseScreen} /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );

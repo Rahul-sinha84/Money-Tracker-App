@@ -10,7 +10,7 @@ import {Button, TextInput} from 'react-native-paper';
 import Heading from '../components/heading/blkAndclr';
 import DatePicker from '../components/months/setDateAndTime';
 
-const editMonthScreen = () => {
+const EditMonthScreen = () => {
   const [curMonth, setCurMonth] = useState('prevValue fethched from db');
   const [gotMoneyOn, setGotMoneyOn] = useState(new Date());
   return (
@@ -45,7 +45,7 @@ const editMonthScreen = () => {
   );
 };
 
-export default editMonthScreen;
+export default EditMonthScreen;
 
 const styles = StyleSheet.create({
   container: {

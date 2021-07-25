@@ -1,15 +1,18 @@
 import React, {useEffect, useState} from 'react';
-import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Text,
+} from 'react-native';
 import Heading from '../components/heading/blkAndclr';
 import DropDown from '../components/dropDown';
 import InpText from '../components/TextInput';
 import {Button} from 'react-native-paper';
-import {not} from 'react-native-reanimated';
-const createExpenseScreen = () => {
-  const totalExpenseTypes = ['credit', 'food & beverages', 'shopping'];
+import DatePicker from '../components/months/setDateAndTime';
+const EditExpenseScreen = () => {
   const boolValues = [true, false];
-  //these are dummy values it would be exchanged by the available months
-  const allMonths = ['jan', 'feb'];
   const [expenseType, setExpenseType] = useState('');
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState(null);
@@ -17,6 +20,8 @@ const createExpenseScreen = () => {
   const [badChoice, setBadChoice] = useState(false);
   const [month, setMonth] = useState('');
   const [paidByCash, setPaidByCash] = useState(false);
+  const [gotMoneyOn, setGotMoneyOn] = useState(new Date());
+  console.log(gotMoneyOn);
   //send today's date at the time of creation
   //data will be filled in useEffect
   useEffect(() => {
@@ -32,13 +37,14 @@ const createExpenseScreen = () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.container__upper}>
-        <Heading color="#ff7730b3" blkMsg="Manage," clrMsg="Expense" />
+        <Heading color="#ff7730b3" blkMsg="Edit," clrMsg="Expense" />
       </View>
       <View style={styles.container__lower}>
         <DropDown
           title="Select Month:"
           onSelection={setMonth}
-          dropdownItems={allMonths}
+          isDisabled={true}
+          disabledValue={month}
         />
         <InpText
           initialValue={title}
@@ -51,6 +57,7 @@ const createExpenseScreen = () => {
           mode="outlined"
           label="Amount"
           onHandleChange={setAmount}
+          isDisabled={true}
           keyboardType="decimal-pad"
         />
         <InpText
@@ -62,7 +69,8 @@ const createExpenseScreen = () => {
         <DropDown
           title="Set Expense Type:"
           onSelection={setExpenseType}
-          dropdownItems={totalExpenseTypes}
+          isDisabled={true}
+          disabledValue={expenseType}
         />
         <DropDown
           title="Is it a Bad Choice ?"
@@ -73,7 +81,18 @@ const createExpenseScreen = () => {
           title="Paid by Cash ?"
           onSelection={setPaidByCash}
           dropdownItems={boolValues}
+          isDisabled={true}
+          disabledValue={`${paidByCash}`}
         />
+        <View style={styles.datePicker_style}>
+          <Text style={styles.datePickerLabel}>Set Got Money on</Text>
+          <DatePicker
+            returnDate={val => {
+              setGotMoneyOn(val);
+            }}
+            prevDate={gotMoneyOn}
+          />
+        </View>
         <TouchableOpacity>
           <Button mode="contained" style={styles.btnStyle}>
             Submit
@@ -84,7 +103,7 @@ const createExpenseScreen = () => {
   );
 };
 
-export default createExpenseScreen;
+export default EditExpenseScreen;
 
 const styles = StyleSheet.create({
   container: {},
@@ -101,5 +120,15 @@ const styles = StyleSheet.create({
     marginHorizontal: 145,
     paddingVertical: 4,
     marginVertical: 20,
+  },
+  datePicker_style: {
+    display: 'flex',
+    marginHorizontal: 15,
+    marginVertical: 15,
+  },
+  datePickerLabel: {
+    color: '#777',
+    marginVertical: 10,
+    marginLeft: 15,
   },
 });

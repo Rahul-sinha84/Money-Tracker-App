@@ -2,7 +2,13 @@ import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import ModalDropdown from 'react-native-modal-dropdown';
 
-const index = ({title = '', dropdownItems = [], onSelection}) => {
+const index = ({
+  title = '',
+  dropdownItems = [],
+  onSelection,
+  isDisabled = false,
+  disabledValue = 'Please Select...',
+}) => {
   const onSelect = val => {
     onSelection(dropdownItems[val]);
   };
@@ -10,13 +16,18 @@ const index = ({title = '', dropdownItems = [], onSelection}) => {
     <View style={styles.container}>
       <Text style={styles.textStyle}>{title}</Text>
       <ModalDropdown
-        style={[styles.dropdownStyle]}
+        style={
+          isDisabled
+            ? [styles.dropdownStyle, {backgroundColor: '#777'}]
+            : styles.dropdownStyle
+        }
         textStyle={styles.titleStyle}
         dropdownStyle={styles.dropdownListStyle}
         dropdownTextStyle={styles.dropdownListTextStyle}
         dropdownTextHighlightStyle={styles.dropdownSelectedOption}
         onSelect={onSelect}
-        defaultValue="Please Select..."
+        disabled={isDisabled}
+        defaultValue={disabledValue}
         options={dropdownItems}
       />
     </View>

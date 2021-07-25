@@ -10,15 +10,42 @@ const MonthScreen = ({navigation}) => {
       </View>
       <View style={styles.expenseContent}>
         <ScrollView style={styles.scrollContainer}>
-          <ExpenseCard />
-          <ExpenseCard />
-          <ExpenseCard />
-          <ExpenseCard />
-          <ExpenseCard />
-          <ExpenseCard />
-          <ExpenseCard />
-          <ExpenseCard />
-          <ExpenseCard />
+          <ExpenseCard
+            toNavigate={navigation}
+            whereToNavigate="editExpenseScreen"
+          />
+          <ExpenseCard
+            toNavigate={navigation}
+            whereToNavigate="editExpenseScreen"
+          />
+          <ExpenseCard
+            toNavigate={navigation}
+            whereToNavigate="editExpenseScreen"
+          />
+          <ExpenseCard
+            toNavigate={navigation}
+            whereToNavigate="editExpenseScreen"
+          />
+          <ExpenseCard
+            toNavigate={navigation}
+            whereToNavigate="editExpenseScreen"
+          />
+          <ExpenseCard
+            toNavigate={navigation}
+            whereToNavigate="editExpenseScreen"
+          />
+          <ExpenseCard
+            toNavigate={navigation}
+            whereToNavigate="editExpenseScreen"
+          />
+          <ExpenseCard
+            toNavigate={navigation}
+            whereToNavigate="editExpenseScreen"
+          />
+          <ExpenseCard
+            toNavigate={navigation}
+            whereToNavigate="editExpenseScreen"
+          />
         </ScrollView>
       </View>
     </SafeAreaView>

@@ -4,7 +4,7 @@ import Heading from '../components/heading/blkAndclr';
 import DropDown from '../components/dropDown';
 import InpText from '../components/TextInput';
 import {Button} from 'react-native-paper';
-const createExpenseScreen = () => {
+const CreateExpenseScreen = () => {
   const totalExpenseTypes = ['credit', 'food & beverages', 'shopping'];
   const boolValues = [true, false];
   //these are dummy values it would be exchanged by the available months
@@ -61,7 +61,7 @@ const createExpenseScreen = () => {
   );
 };
 
-export default createExpenseScreen;
+export default CreateExpenseScreen;
 
 const styles = StyleSheet.create({
   container: {},

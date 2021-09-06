@@ -107,7 +107,26 @@ const CreateUser = ({navigation, actions, userData}) => {
       navigation.navigate('HomeScreen');
     }
   };
-  const enterWallet = () => {
+  const enterWallet = async () => {
+    const response = await axios.post('/', {
+      query: `
+        query{
+          getUser(userId:"${userData.userInfo.uid}") {
+            ...on User {
+              userId
+              _id
+              cashPrice
+              totalAmount
+            }
+            ...on errMessage {
+              msg
+            }
+          }
+        }
+      `,
+    });
+    const user = response.data.data.getUser;
+    actions.setMongoId(user._id);
     actions.setIsCreated(true);
     if (userData.isCreated) {
       navigation.navigate('HomeScreen');

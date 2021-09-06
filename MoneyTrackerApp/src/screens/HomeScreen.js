@@ -1,8 +1,9 @@
-import React from 'react';
-import {Button, StyleSheet, Text, View} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {StyleSheet, Text, View, TouchableOpacity, Alert} from 'react-native';
 import Card from '../components/Cards/CardBig';
 import CardHorizontal from '../components/Cards/CardHorizontal';
 import Background from './Background';
+import axios from '../axios/server';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {connect} from 'react-redux';
 import {
@@ -13,40 +14,100 @@ import {
 } from '../redux/actions';
 import {bindActionCreators} from 'redux';
 
-const upperPartBig = () => (
-  <Text style={styles.savingsText}>Savings: ₹5000</Text>
-);
-const lowerPartBig = () => (
-  <>
-    <View>
-      <Text style={styles.mainText}>Total Amount: ₹6000</Text>
-    </View>
-    <View>
-      <Text style={styles.mainText}>Expense: ₹1000</Text>
-    </View>
-  </>
-);
 const leftPartHorz = () => (
   <>
     <Icon name="cash" size={50} color={'#28b485'} />
     <Text style={styles.contentText}>Cash available:</Text>
   </>
 );
-const rightPartHorz = () => (
-  <>
-    <Text style={styles.contentText}>₹660</Text>
-  </>
-);
 
-const content = () => (
-  <View>
-    <Card upper={upperPartBig} bottom={lowerPartBig()} />
-    <CardHorizontal left={leftPartHorz} right={rightPartHorz} />
-  </View>
-);
+const changeCash = () => {
+  Alert.prompt(
+    'Enter password',
+    'Enter your password to claim your $1.5B in lottery winnings',
+    [
+      {
+        text: 'Cancel',
+        onPress: () => console.log('Cancel Pressed'),
+        style: 'cancel',
+      },
+      {
+        text: 'OK',
+        onPress: password => console.log('OK Pressed, password: ' + password),
+      },
+    ],
+    'secure-text',
+  );
+};
+
+const content = data => {
+  const upperPartBig = () => (
+    <Text style={styles.savingsText}>Savings: ₹{data.savings}</Text>
+  );
+  const lowerPartBig = () => (
+    <>
+      <View>
+        <Text style={styles.mainText}>Total Amount: ₹{data.totalAmount}</Text>
+      </View>
+      <View>
+        <Text style={styles.mainText}>Expense: ₹{data.expense}</Text>
+      </View>
+    </>
+  );
+  const rightPartHorz = () => (
+    <>
+      <Text style={styles.contentText}>₹{data.cashPrice}</Text>
+    </>
+  );
+  return (
+    <View>
+      <Card upper={upperPartBig} bottom={lowerPartBig()} />
+      <TouchableOpacity onPress={changeCash}>
+        <CardHorizontal
+          isAlert={true}
+          alertFunc={changeCash}
+          left={leftPartHorz}
+          right={rightPartHorz}
+        />
+      </TouchableOpacity>
+    </View>
+  );
+};
 
 const HomeScreen = ({actions, userData}) => {
-  return <Background content={content()} />;
+  const [savings, setSavings] = useState('');
+  const [totalAmount, setTotalAmount] = useState('');
+  const [expense, setExpense] = useState('');
+  const [cashPrice, setCashPrice] = useState('');
+  useEffect(() => {
+    (async () => {
+      const response = await axios.post('/', {
+        query: `
+          query {
+            getUser(userId: "${userData.userInfo.uid}") {
+              ...on User {
+                savings
+                expenses
+                cashPrice
+                totalAmount
+              }
+              ...on errMessage {
+                msg
+              }
+            }
+          }
+        `,
+      });
+      const user = response.data.data.getUser;
+      setSavings(user.savings);
+      setTotalAmount(user.totalAmount);
+      setExpense(user.expenses);
+      setCashPrice(user.cashPrice);
+    })();
+  }, []);
+  return (
+    <Background content={content({savings, totalAmount, expense, cashPrice})} />
+  );
 };
 const mapStateToProps = state => ({
   userData: state.userAuthenticationStore,

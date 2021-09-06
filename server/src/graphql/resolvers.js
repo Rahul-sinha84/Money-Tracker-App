@@ -100,8 +100,10 @@ export const resolvers = {
         })
         .catch((err) => ({ msg: error.msg })),
     getUser: (parent, { userId }) =>
-      User.findById(userId)
-        .then((resolve) => resolve)
+      User.findOne({userId})
+        .then((resolve) => {
+            return resolve;
+        })
         .catch((err) => ({ msg: err.message })),
   },
   Mutation: {

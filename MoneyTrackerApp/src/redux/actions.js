@@ -3,6 +3,7 @@ import {
   USER_INFO,
   SIGN_IN_METHOD,
   CREATED_STATUS,
+  MONGO_ID,
 } from './constants';
 
 export const setLoginStatus = data => ({
@@ -22,5 +23,10 @@ export const setAuthenticationMethod = data => ({
 
 export const setIsCreated = data => ({
   type: CREATED_STATUS,
+  payload: data,
+});
+
+export const setMongoId = data => ({
+  type: MONGO_ID,
   payload: data,
 });

@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import { ApolloServer } from 'apollo-server-express';
+import cors from 'cors'
 const PORT = 9000;
 import { typeDefs } from './graphql/typedefs';
 import { resolvers } from './graphql/resolvers';
@@ -8,6 +9,7 @@ import { resolvers } from './graphql/resolvers';
 
 (async () => {
     const app = express();
+    app.use(cors());
     await mongoose.connect('mongodb://localhost/money_management', {
         useNewUrlParser: true,
         useUnifiedTopology: true

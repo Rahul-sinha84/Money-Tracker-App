@@ -3,11 +3,13 @@ import {
   USER_INFO,
   SIGN_IN_METHOD,
   CREATED_STATUS,
+  MONGO_ID,
 } from './constants';
 
 const initialAuthenticationState = {
   isLoggedIn: false,
   userInfo: {},
+  mongoId: '',
   authenticationMethod: {},
   isCreated: false,
 };
@@ -28,6 +30,9 @@ export const authenticationReducer = (
     }
     case CREATED_STATUS: {
       return {...state, isCreated: action.payload};
+    }
+    case MONGO_ID: {
+      return {...state, mongoId: action.payload};
     }
     default: {
       return state;

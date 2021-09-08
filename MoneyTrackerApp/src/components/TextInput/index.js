@@ -18,7 +18,7 @@ const Index = ({
   return (
     <TextInput
       style={styles.textInp}
-      value={initialValue}
+      value={text}
       disabled={isDisabled}
       onChangeText={onChangeText}
       label={label}

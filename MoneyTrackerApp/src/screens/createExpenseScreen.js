@@ -1,33 +1,87 @@
-import React, {useState} from 'react';
-import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import Heading from '../components/heading/blkAndclr';
 import DropDown from '../components/dropDown';
 import InpText from '../components/TextInput';
 import {Button} from 'react-native-paper';
-const CreateExpenseScreen = () => {
+import axios from '../axios/server';
+
+const CreateExpenseScreen = ({navigation, route}) => {
   const totalExpenseTypes = ['credit', 'food & beverages', 'shopping'];
   const boolValues = [true, false];
-  //these are dummy values it would be exchanged by the available months
-  const allMonths = ['jan', 'feb'];
   const [expenseType, setExpenseType] = useState('');
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState(null);
   const [note, setNote] = useState('');
-  const [badChoice, setBadChoice] = useState(false);
-  const [month, setMonth] = useState('');
-  const [paidByCash, setPaidByCash] = useState(false);
+  const [badChoice, setBadChoice] = useState('');
+  const [monthId, setMonthId] = useState('');
+  const [paidByCash, setPaidByCash] = useState('');
   //send today's date at the time of creation
+
+  useEffect(() => {
+    let {id} = route.params;
+    setMonthId(id);
+  }, []);
+  const onPress = async () => {
+    if (
+      !expenseType ||
+      !title ||
+      !amount ||
+      !note ||
+      !monthId ||
+      badChoice === '' ||
+      paidByCash === ''
+    ) {
+      return Alert.alert('Please fill all the required fields !!');
+    }
+    await axios
+      .post('/', {
+        query: `
+        mutation {
+        createExpense(
+          title:"${title}"
+          Note:"${note}",
+          expType:"${expenseType}",
+          amount:${amount},
+          badChoice: ${badChoice},
+          month: "${monthId}",
+          paidByCash: ${paidByCash}
+          dateOfPurchase: "${new Date()}"
+          ) {
+            ...on Expenses {
+              _id
+              title
+              amount
+              expType
+              badChoice
+            }
+            ...on errMessage {
+              msg
+            }
+          }
+        }
+      `,
+      })
+      .then(res => {
+        navigation.navigate('MonthScreen');
+      })
+      .catch(err => {
+        console.log(err);
+        Alert.alert('Some error occured, Please try again later !!');
+      });
+  };
   return (
     <ScrollView style={styles.container}>
       <View style={styles.container__upper}>
         <Heading color="#ff7730b3" blkMsg="Manage," clrMsg="Expense" />
       </View>
       <View style={styles.container__lower}>
-        <DropDown
-          title="Select Month:"
-          onSelection={setMonth}
-          dropdownItems={allMonths}
-        />
         <InpText mode="outlined" label="Title" onHandleChange={setTitle} />
         <InpText
           mode="outlined"
@@ -51,7 +105,7 @@ const CreateExpenseScreen = () => {
           onSelection={setPaidByCash}
           dropdownItems={boolValues}
         />
-        <TouchableOpacity>
+        <TouchableOpacity onPress={onPress}>
           <Button mode="contained" style={styles.btnStyle}>
             Submit
           </Button>

@@ -4,7 +4,7 @@ import CreateButton from '../buttons/EditButton';
 import DeleteButton from '../buttons/DeleteButton';
 import AddButton from '../buttons/AddButton';
 
-const CardMonth = ({toNavigate}) => {
+const CardMonth = ({toNavigate, id = ''}) => {
   return (
     <SafeAreaView style={styles.parentContainer}>
       <View style={styles.containerUpper}>
@@ -22,10 +22,12 @@ const CardMonth = ({toNavigate}) => {
       <View style={styles.buttonContainer}>
         <CreateButton
           toNavigate={toNavigate}
+          params={id}
           whereToNavigate="EditMonthScreen"
         />
         <AddButton
           toNavigate={toNavigate}
+          params={id}
           whereToNavigate="CreateExpenseScreen"
           text="Expense"
         />

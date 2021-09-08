@@ -12,14 +12,19 @@ const CardHorizontal = ({
   right = () => <></>,
   toNavigate = null,
   whereToNavigate = '',
+  isAlert = false,
+  alertFunc,
+  id = '',
 }) => {
   const onPress = () => {
-    toNavigate != null ? toNavigate.navigate(whereToNavigate) : null;
+    toNavigate != null ? toNavigate.navigate(whereToNavigate, {id}) : null;
   };
   return (
-    <TouchableOpacity onPress={onPress} style={styles.container}>
-      <View style={styles.container__left}>{left()}</View>
-      <View style={styles.container__right}>{right()}</View>
+    <TouchableOpacity
+      onPress={isAlert ? alertFunc : onPress}
+      style={styles.container}>
+      <View style={styles.container__left}>{left}</View>
+      <View style={styles.container__right}>{right}</View>
     </TouchableOpacity>
   );
 };

@@ -1,9 +1,11 @@
 import React from 'react';
 import {StyleSheet, Text, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-const AddButton = ({text, toNavigate = null, whereToNavigate = ''}) => {
+const AddButton = ({text, toNavigate = null, whereToNavigate = '', params}) => {
   const onAdding = () => {
-    toNavigate != null ? toNavigate.navigate(whereToNavigate) : null;
+    toNavigate != null
+      ? toNavigate.navigate(whereToNavigate, {id: params})
+      : null;
   };
   return (
     <TouchableOpacity onPress={onAdding} style={styles.container}>

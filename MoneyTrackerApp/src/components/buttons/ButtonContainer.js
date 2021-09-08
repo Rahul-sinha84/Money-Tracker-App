@@ -1,9 +1,16 @@
 import React from 'react';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
-const ButtonContainer = ({content, toNavigate = null, whereToNavigate}) => {
+const ButtonContainer = ({
+  content,
+  toNavigate = null,
+  whereToNavigate,
+  params,
+}) => {
   const onPress = () => {
-    toNavigate !== null ? toNavigate.navigate(whereToNavigate) : null;
+    toNavigate !== null
+      ? toNavigate.navigate(whereToNavigate, {id: params})
+      : null;
   };
   return (
     <TouchableOpacity onPress={onPress} style={styles.parent}>

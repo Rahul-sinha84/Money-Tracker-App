@@ -1,16 +1,11 @@
-import React from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
 import CardBig from '../components/Cards/CardBig';
 import CardHorizontal from '../components/Cards/CardHorizontal';
 import AddButton from '../components/buttons/AddButton';
 import Background from './Background';
+import axios from '../axios/server';
+import {connect} from 'react-redux';
 
 const upperPart = () => (
   <>
@@ -29,132 +24,83 @@ const lowerPart = navigation => {
   );
 };
 
-const content = navigation => {
+const content = (navigation, monthValues) => {
   return (
     <SafeAreaView style={styles.bodyContainer}>
       <CardBig upper={upperPart} bottom={lowerPart(navigation)} />
       <View style={styles.viewContainer}>
-        <ScrollView style={styles.scrollContainer}>
-          <CardHorizontal
-            toNavigate={navigation}
-            whereToNavigate="MonthScreen"
-            left={leftPartHorz}
-            right={rightPartHorz}
-          />
-          <CardHorizontal
-            toNavigate={navigation}
-            whereToNavigate="MonthScreen"
-            left={leftPartHorz}
-            right={rightPartHorz}
-          />
-          <CardHorizontal
-            toNavigate={navigation}
-            whereToNavigate="MonthScreen"
-            left={leftPartHorz}
-            right={rightPartHorz}
-          />
-          <CardHorizontal
-            toNavigate={navigation}
-            whereToNavigate="MonthScreen"
-            left={leftPartHorz}
-            right={rightPartHorz}
-          />
-          <CardHorizontal
-            toNavigate={navigation}
-            whereToNavigate="MonthScreen"
-            left={leftPartHorz}
-            right={rightPartHorz}
-          />
-          <CardHorizontal
-            toNavigate={navigation}
-            whereToNavigate="MonthScreen"
-            left={leftPartHorz}
-            right={rightPartHorz}
-          />
-          <CardHorizontal
-            toNavigate={navigation}
-            whereToNavigate="MonthScreen"
-            left={leftPartHorz}
-            right={rightPartHorz}
-          />
-          <CardHorizontal
-            toNavigate={navigation}
-            whereToNavigate="MonthScreen"
-            left={leftPartHorz}
-            right={rightPartHorz}
-          />
-          <CardHorizontal
-            toNavigate={navigation}
-            whereToNavigate="MonthScreen"
-            left={leftPartHorz}
-            right={rightPartHorz}
-          />
-          <CardHorizontal
-            toNavigate={navigation}
-            whereToNavigate="MonthScreen"
-            left={leftPartHorz}
-            right={rightPartHorz}
-          />
-          <CardHorizontal
-            toNavigate={navigation}
-            whereToNavigate="MonthScreen"
-            left={leftPartHorz}
-            right={rightPartHorz}
-          />
-          <CardHorizontal
-            toNavigate={navigation}
-            whereToNavigate="MonthScreen"
-            left={leftPartHorz}
-            right={rightPartHorz}
-          />
-          <CardHorizontal
-            toNavigate={navigation}
-            whereToNavigate="MonthScreen"
-            left={leftPartHorz}
-            right={rightPartHorz}
-          />
-          <CardHorizontal
-            toNavigate={navigation}
-            whereToNavigate="MonthScreen"
-            left={leftPartHorz}
-            right={rightPartHorz}
-          />
-          <CardHorizontal
-            toNavigate={navigation}
-            whereToNavigate="MonthScreen"
-            left={leftPartHorz}
-            right={rightPartHorz}
-          />
-          <CardHorizontal
-            toNavigate={navigation}
-            whereToNavigate="MonthScreen"
-            left={leftPartHorz}
-            right={rightPartHorz}
-          />
-        </ScrollView>
+        <ScrollView style={styles.scrollContainer}>{monthValues}</ScrollView>
       </View>
     </SafeAreaView>
   );
 };
-const leftPartHorz = () => (
+const leftPartHorz = (name = '') => (
   <>
-    <Text style={styles.monthText}>Month</Text>
+    <Text style={styles.monthText}>{name}</Text>
   </>
 );
-const rightPartHorz = () => (
+const rightPartHorz = (mnyAvailable = null, mnysaved = null) => (
   <>
     <View>
-      <Text style={styles.monthVals}>Money available: ₹400</Text>
-      <Text style={styles.monthVals}>Money saved: ₹500</Text>
+      <Text style={styles.monthVals}>Money available: ₹{mnyAvailable}</Text>
+      <Text style={styles.monthVals}>Money saved: ₹{mnysaved}</Text>
     </View>
   </>
 );
 
-const ExpenseScreen = ({navigation}) => {
-  return <Background content={content(navigation)} />;
+const ExpenseScreen = ({navigation, userData}) => {
+  const [monthValues, setMonthValues] = useState([]);
+  const fetchData = async () => {
+    const response = await axios.post('/', {
+      query: `
+      query {
+        getAllMonths(userId:"${userData.mongoId}") {
+          ...on MonthExpArray {
+            allMonths {
+              _id
+              currentMonth
+              currentAmount
+              amountSaved
+            }
+          }
+          ...on errMessage {
+            msg
+          }
+        }
+      }
+        `,
+    });
+    const data = response.data.data.getAllMonths;
+    if (data.allMonths) {
+      const filteredData = data.allMonths.filter(val => val !== null).reverse();
+      allCards(filteredData);
+    }
+  };
+  useEffect(() => {
+    //for fetching from db whenever app redirects to this screen
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchData();
+    });
+    return unsubscribe;
+  }, [navigation]);
+  const allCards = data => {
+    const arr = data.map(val => (
+      <CardHorizontal
+        key={val._id}
+        toNavigate={navigation}
+        id={val._id}
+        whereToNavigate="MonthScreen"
+        left={leftPartHorz(val.currentMonth)}
+        right={rightPartHorz(val.currentAmount, val.amountSaved)}
+      />
+    ));
+    setMonthValues(arr);
+  };
+  return <Background content={content(navigation, monthValues)} />;
 };
 
-export default ExpenseScreen;
+const mapStateToProps = state => ({userData: state.userAuthenticationStore});
+export default connect(mapStateToProps)(ExpenseScreen);
 
 const styles = StyleSheet.create({
   bodyContainer: {},

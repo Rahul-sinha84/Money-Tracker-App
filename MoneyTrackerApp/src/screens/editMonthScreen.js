@@ -1,24 +1,68 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   SafeAreaView,
   TouchableOpacity,
   StyleSheet,
   Text,
   View,
+  Alert,
 } from 'react-native';
 import {Button, TextInput} from 'react-native-paper';
 import Heading from '../components/heading/blkAndclr';
 import DatePicker from '../components/months/setDateAndTime';
+import axios from '../axios/server';
 
-const EditMonthScreen = () => {
+const EditMonthScreen = ({navigation, route}) => {
   const [curMonth, setCurMonth] = useState('prevValue fethched from db');
   const [gotMoneyOn, setGotMoneyOn] = useState(new Date());
+
+  useEffect(() => {
+    if (route.params) {
+      const {gotMoneyOn, currentMonth} = route.params.id;
+      setCurMonth(currentMonth);
+      setGotMoneyOn(gotMoneyOn);
+    }
+  }, [route]);
+
+  const onPress = async () => {
+    if (!curMonth) {
+      return Alert.alert('Please fill the required blank !!');
+    }
+    await axios
+      .post('/', {
+        query: `
+        mutation {
+          editMonth(
+          _id:"${route.params.id._id}",
+          currentMonth:"${curMonth}",
+          gotMoneyOn:"${gotMoneyOn}") {
+            ...on MonthExp {
+              _id
+              currentMonth
+              gotMoneyOn
+            }
+            ...on errMessage {
+              msg
+            }
+          }
+        }
+      `,
+      })
+      .then(response => {
+        navigation.navigate('MonthScreen');
+      })
+      .catch(err => {
+        console.log(err);
+        Alert.alert('Something went wrong, please try again later !!');
+      });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.container__upper}>
+      <View>
         <Heading blkMsg="Modify," clrMsg="This Month" color="#eb2f64" />
       </View>
-      <View style={styles.container__lower}>
+      <View>
         <TextInput
           value={curMonth}
           onChangeText={text => setCurMonth(text)}
@@ -35,7 +79,7 @@ const EditMonthScreen = () => {
             prevDate={gotMoneyOn}
           />
         </View>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={onPress}>
           <Button style={styles.btnStyle} mode="contained">
             Modify
           </Button>
@@ -49,16 +93,8 @@ export default EditMonthScreen;
 
 const styles = StyleSheet.create({
   container: {
-    // backgroundColor: 'lightgreen',
     flex: 0.89,
     justifyContent: 'space-evenly',
-  },
-  container__upper: {
-    // backgroundColor: 'pink',
-    // marginVertical: 20,
-  },
-  container__lower: {
-    // backgroundColor: 'white',
   },
   textInputStyle: {
     marginBottom: 20,

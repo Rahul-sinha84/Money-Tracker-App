@@ -1,38 +1,70 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
 import CreateButton from '../buttons/EditButton';
 import DeleteButton from '../buttons/DeleteButton';
 import AddButton from '../buttons/AddButton';
+import {ActivityIndicator} from 'react-native-paper';
 
-const CardMonth = ({toNavigate, id = ''}) => {
+const CardMonth = ({toNavigate, id = '', monthInfo}) => {
+  const [loading, setLoading] = useState(true);
+  const [date, setDate] = useState('');
+
+  useEffect(() => {
+    if (monthInfo.gotMoneyOn) {
+      let reterivedDate = new Date(monthInfo.gotMoneyOn);
+      const _date = reterivedDate.getDate();
+      const _month = reterivedDate.getMonth() + 1;
+      const _year = reterivedDate.getFullYear();
+      const finalDate = `${_date}/${_month}/${_year}`;
+      setDate(finalDate);
+      setLoading(false);
+    }
+  }, [monthInfo]);
+
   return (
     <SafeAreaView style={styles.parentContainer}>
-      <View style={styles.containerUpper}>
-        <Text style={styles.primaryText}>Got Money on: 06/03/2021</Text>
-        <Text style={styles.primaryText}>Total Amount: ₹600</Text>
-      </View>
-      <View style={styles.containerMiddle}>
-        <Text style={styles.headerText}>month</Text>
-        <Text>Current Amount: ₹535</Text>
-      </View>
-      <View style={styles.containerBottom}>
-        <Text style={styles.primaryText}>Amount Saved: ₹535</Text>
-        <Text style={styles.primaryText}>Amount Spent: ₹65</Text>
-      </View>
-      <View style={styles.buttonContainer}>
-        <CreateButton
-          toNavigate={toNavigate}
-          params={id}
-          whereToNavigate="EditMonthScreen"
-        />
-        <AddButton
-          toNavigate={toNavigate}
-          params={id}
-          whereToNavigate="CreateExpenseScreen"
-          text="Expense"
-        />
-        <DeleteButton />
-      </View>
+      {loading ? (
+        <ActivityIndicator style={styles.loading} color="#000" />
+      ) : (
+        <>
+          <View style={styles.containerUpper}>
+            <Text style={styles.primaryText}>Got Money on: {date}</Text>
+            <Text style={styles.primaryText}>
+              Total Amount: ₹{monthInfo.totalAmount}
+            </Text>
+          </View>
+          <View style={styles.containerMiddle}>
+            <Text style={styles.headerText}>{monthInfo.currentMonth}</Text>
+            <Text>Current Amount: ₹{monthInfo.currentAmount}</Text>
+          </View>
+          <View style={styles.containerBottom}>
+            <Text style={styles.primaryText}>
+              Amount Saved: ₹{monthInfo.amountSaved}
+            </Text>
+            <Text style={styles.primaryText}>
+              Amount Spent: ₹{monthInfo.amountSpent}
+            </Text>
+          </View>
+          <View style={styles.buttonContainer}>
+            <CreateButton
+              toNavigate={toNavigate}
+              params={monthInfo}
+              whereToNavigate="EditMonthScreen"
+            />
+            <AddButton
+              toNavigate={toNavigate}
+              params={id}
+              whereToNavigate="CreateExpenseScreen"
+              text="Expense"
+            />
+            <DeleteButton
+              id={id}
+              toNavigate={toNavigate}
+              whereToNavigate="ExpenseScreen"
+            />
+          </View>
+        </>
+      )}
     </SafeAreaView>
   );
 };
@@ -49,6 +81,7 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
     borderColor: '#ff762f',
     borderWidth: 1.5,
+    height: 225,
   },
   containerUpper: {
     width: '100%',
@@ -82,5 +115,8 @@ const styles = StyleSheet.create({
     width: '100%',
     position: 'absolute',
     bottom: -25,
+  },
+  loading: {
+    marginVertical: 105,
   },
 });

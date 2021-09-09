@@ -66,45 +66,48 @@ const content = data => {
         <CardHorizontal
           isAlert={true}
           alertFunc={changeCash}
-          left={leftPartHorz}
-          right={rightPartHorz}
+          left={leftPartHorz()}
+          right={rightPartHorz()}
         />
       </TouchableOpacity>
     </View>
   );
 };
 
-const HomeScreen = ({actions, userData}) => {
+const HomeScreen = ({actions, userData, navigation}) => {
   const [savings, setSavings] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
   const [expense, setExpense] = useState('');
   const [cashPrice, setCashPrice] = useState('');
   useEffect(() => {
-    (async () => {
-      const response = await axios.post('/', {
-        query: `
-          query {
-            getUser(userId: "${userData.userInfo.uid}") {
-              ...on User {
-                savings
-                expenses
-                cashPrice
-                totalAmount
-              }
-              ...on errMessage {
-                msg
+    const unsubscribe = navigation.addListener('focus', () => {
+      (async () => {
+        const response = await axios.post('/', {
+          query: `
+            query {
+              getUser(userId: "${userData.userInfo.uid}") {
+                ...on User {
+                  savings
+                  expenses
+                  cashPrice
+                  totalAmount
+                }
+                ...on errMessage {
+                  msg
+                }
               }
             }
-          }
-        `,
-      });
-      const user = response.data.data.getUser;
-      setSavings(user.savings);
-      setTotalAmount(user.totalAmount);
-      setExpense(user.expenses);
-      setCashPrice(user.cashPrice);
-    })();
-  }, []);
+          `,
+        });
+        const user = response.data.data.getUser;
+        setSavings(user.savings);
+        setTotalAmount(user.totalAmount);
+        setExpense(user.expenses);
+        setCashPrice(user.cashPrice);
+      })();
+    });
+    return unsubscribe;
+  }, [navigation]);
   return (
     <Background content={content({savings, totalAmount, expense, cashPrice})} />
   );

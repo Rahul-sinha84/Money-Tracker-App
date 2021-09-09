@@ -14,13 +14,13 @@ import CreateExpenseScreen from './src/screens/createExpenseScreen';
 import WelcomeScreen from './src/screens/WelcomeScreen';
 import UserProfileScreen from './src/screens/userProfileScreen';
 import {connect} from 'react-redux';
-import {bindActionCreators} from 'redux';
 import {
   setLoginStatus,
   setUserData,
   setAuthenticationMethod,
 } from './src/redux/actions';
 import EditExpenseScreen from './src/screens/EditExpenseScreen';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 
 const Tabs = createBottomTabNavigator();
 const Stack = createStackNavigator();

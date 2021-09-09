@@ -1,18 +1,27 @@
 import React from 'react';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
-const ExpenseCard = ({toNavigate = null, whereToNavigate = ''}) => {
+const ExpenseCard = ({
+  toNavigate = null,
+  whereToNavigate = '',
+  title = '',
+  expType = '',
+  amount = null,
+  data,
+}) => {
   const onPress = () => {
-    toNavigate ? toNavigate.navigate(whereToNavigate) : null;
+    if (data) {
+      toNavigate ? toNavigate.navigate(whereToNavigate, {data}) : null;
+    }
   };
   return (
     <TouchableOpacity onPress={onPress} style={styles.parent}>
       <View style={styles.leftPart}>
-        <Text style={styles.mainText}>Title</Text>
-        <Text style={styles.primaryText}>Exp Type</Text>
+        <Text style={styles.mainText}>{title}</Text>
+        <Text style={styles.primaryText}>{expType}</Text>
       </View>
       <View style={styles.rightPart}>
-        <Text style={styles.primaryText}>Amount: ₹25</Text>
+        <Text style={styles.primaryText}>Amount: ₹{amount}</Text>
       </View>
     </TouchableOpacity>
   );

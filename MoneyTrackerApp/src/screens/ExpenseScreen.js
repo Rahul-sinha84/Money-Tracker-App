@@ -6,6 +6,7 @@ import AddButton from '../components/buttons/AddButton';
 import Background from './Background';
 import axios from '../axios/server';
 import {connect} from 'react-redux';
+import {ActivityIndicator} from 'react-native-paper';
 
 const upperPart = () => (
   <>
@@ -24,16 +25,6 @@ const lowerPart = navigation => {
   );
 };
 
-const content = (navigation, monthValues) => {
-  return (
-    <SafeAreaView style={styles.bodyContainer}>
-      <CardBig upper={upperPart} bottom={lowerPart(navigation)} />
-      <View style={styles.viewContainer}>
-        <ScrollView style={styles.scrollContainer}>{monthValues}</ScrollView>
-      </View>
-    </SafeAreaView>
-  );
-};
 const leftPartHorz = (name = '') => (
   <>
     <Text style={styles.monthText}>{name}</Text>
@@ -49,7 +40,8 @@ const rightPartHorz = (mnyAvailable = null, mnysaved = null) => (
 );
 
 const ExpenseScreen = ({navigation, userData}) => {
-  const [monthValues, setMonthValues] = useState([]);
+  const [monthValues, setMonthValues] = useState(null);
+
   const fetchData = async () => {
     const response = await axios.post('/', {
       query: `
@@ -96,7 +88,25 @@ const ExpenseScreen = ({navigation, userData}) => {
     ));
     setMonthValues(arr);
   };
-  return <Background content={content(navigation, monthValues)} />;
+  const content = () => {
+    return (
+      <SafeAreaView style={styles.bodyContainer}>
+        <CardBig upper={upperPart} bottom={lowerPart(navigation)} />
+        <View style={styles.viewContainer}>
+          <ScrollView style={styles.scrollContainer}>
+            {monthValues === null ? (
+              <ActivityIndicator color="#000" />
+            ) : !monthValues.length ? (
+              <Text style={styles.loading}>No Months added so far...</Text>
+            ) : (
+              monthValues
+            )}
+          </ScrollView>
+        </View>
+      </SafeAreaView>
+    );
+  };
+  return <Background content={content()} />;
 };
 
 const mapStateToProps = state => ({userData: state.userAuthenticationStore});
@@ -128,5 +138,10 @@ const styles = StyleSheet.create({
   },
   monthVals: {
     fontSize: 14,
+  },
+  loading: {
+    textAlign: 'center',
+    fontSize: 17,
+    fontWeight: 'bold',
   },
 });

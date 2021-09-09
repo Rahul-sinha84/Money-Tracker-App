@@ -25,6 +25,7 @@ const userProfileScreen = ({actions, userData}) => {
   let email = userData.userInfo.email;
   let name = userData.userInfo.displayName;
   const deleteAccount = () => {
+    //api call for deletion of account
     console.log('account has been deleted !!');
   };
   const deleteBtnPress = () => {
@@ -42,13 +43,13 @@ const userProfileScreen = ({actions, userData}) => {
       ],
     );
   };
-  const signout = () => {
+  const signout = async () => {
     //for signout
-    userData.authenticationMethod.revokeAccess();
-    userData.authenticationMethod.signOut();
-    actions.setLoginStatus(false);
-    actions.setUserData({});
-    actions.setIsCreated(false);
+    await userData.authenticationMethod.revokeAccess();
+    await userData.authenticationMethod.signOut();
+    await actions.setLoginStatus(false);
+    await actions.setUserData({});
+    await actions.setIsCreated(false);
   };
   return (
     <SafeAreaView style={styles.container}>

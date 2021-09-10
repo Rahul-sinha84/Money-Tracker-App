@@ -1,6 +1,5 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -12,6 +11,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {connect} from 'react-redux';
+import axios from '../axios/server';
 import {
   setLoginStatus,
   setUserData,
@@ -19,19 +19,96 @@ import {
   setIsCreated,
 } from '../redux/actions';
 import {bindActionCreators} from 'redux';
+import {ActivityIndicator} from 'react-native-paper';
 
-const userProfileScreen = ({actions, userData}) => {
+const UserProfileScreen = ({actions, userData, navigation}) => {
   let source = userData.userInfo.photoURL;
   let email = userData.userInfo.email;
   let name = userData.userInfo.displayName;
-  const deleteAccount = () => {
+  const [totalMonths, setTotalMonths] = useState(null);
+  const [totalExpenses, setTotalExpenses] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchData();
+    });
+    return unsubscribe;
+  }, [navigation]);
+  const fetchData = async () => {
+    await axios
+      .post('/', {
+        query: `
+        query {
+          getAllMonths(userId:"${userData.mongoId}") {
+            ...on MonthExpArray {
+              allMonths {
+                _id
+                currentMonth
+                currentAmount
+                amountSaved
+                allExpenses
+              }
+            }
+            ...on errMessage {
+              msg
+            }
+          }
+        }
+      `,
+      })
+      .then(response => {
+        if (response.data.data.getAllMonths.msg) {
+          Alert('No such user exists, try after logging in again  !!');
+          return signout();
+        }
+        const _totalMonths = response.data.data.getAllMonths.allMonths;
+        setTotalMonths(_totalMonths.length);
+        let count = 0;
+        _totalMonths.forEach(val => {
+          count += val.allExpenses.length;
+        });
+        setTotalExpenses(count);
+        setLoading(false);
+      })
+      // eslint-disable-next-line handle-callback-err
+      .catch(err => {
+        Alert.alert(
+          'There is some error while fetching your info, try after logging in again !!',
+        );
+      });
+  };
+  const deleteAccount = async () => {
     //api call for deletion of account
-    console.log('account has been deleted !!');
+    await axios
+      .post('/', {
+        query: `
+        mutation {
+          removeUser(_id:"${userData.mongoId}") {
+            ...on User {
+              userId
+              cashPrice
+              totalAmount
+              expenses
+            }
+            ...on errMessage {
+              msg
+            }
+          }
+        }
+      `,
+      })
+      .then(response => {
+        if (response.data.data.removeUser.msg) {
+          return Alert.alert('Something went wrong, Please try again later !!');
+        }
+        signout();
+      });
   };
   const deleteBtnPress = () => {
     Alert.alert(
       'Delete Account?',
-      'All the corresponding Expenses and Months will be deleted !!',
+      'All the corresponding Expenses and Months will be deleted completely!!',
       [
         {
           text: 'Yes',
@@ -54,21 +131,27 @@ const userProfileScreen = ({actions, userData}) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.container__upper}>
-        <View style={styles.googleInfo}>
-          <Image source={{uri: source}} style={styles.picture} />
-          <Text style={styles.nameStyle}>{name}</Text>
-          <Text style={styles.emailStyle}>{email}</Text>
-        </View>
-        <View style={styles.dbInfo}>
-          <View style={styles.dbValues}>
-            <Text style={styles.titleStyle}>Total Months</Text>
-            <Text style={styles.nmbrStyle}>2</Text>
-          </View>
-          <View style={styles.dbValues}>
-            <Text style={styles.titleStyle}>Total Expenses</Text>
-            <Text style={styles.nmbrStyle}>20</Text>
-          </View>
-        </View>
+        {loading ? (
+          <ActivityIndicator style={styles.loading} color="#000" />
+        ) : (
+          <>
+            <View style={styles.googleInfo}>
+              <Image source={{uri: source}} style={styles.picture} />
+              <Text style={styles.nameStyle}>{name}</Text>
+              <Text style={styles.emailStyle}>{email}</Text>
+            </View>
+            <View style={styles.dbInfo}>
+              <View style={styles.dbValues}>
+                <Text style={styles.titleStyle}>Total Months</Text>
+                <Text style={styles.nmbrStyle}>{totalMonths}</Text>
+              </View>
+              <View style={styles.dbValues}>
+                <Text style={styles.titleStyle}>Total Expenses</Text>
+                <Text style={styles.nmbrStyle}>{totalExpenses}</Text>
+              </View>
+            </View>
+          </>
+        )}
       </View>
       <View style={styles.container__lower}>
         <View style={styles.btnContainer}>
@@ -105,7 +188,7 @@ const mapDispatchToProps = dispatch => ({
   actions: bindActionCreators(ActionCreators, dispatch),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(userProfileScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(UserProfileScreen);
 
 const styles = StyleSheet.create({
   container: {
@@ -120,6 +203,7 @@ const styles = StyleSheet.create({
     elevation: 7,
     paddingTop: 60,
     paddingBottom: 25,
+    height: 400,
   },
   container__lower: {
     flex: 1,
@@ -193,11 +277,13 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   btnContainer: {
-    // backgroundColor: 'black',
     height: 250,
     marginVertical: 50,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-evenly',
+  },
+  loading: {
+    marginVertical: 100,
   },
 });

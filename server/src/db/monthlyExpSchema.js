@@ -16,7 +16,6 @@ const monthlyExpSchema = new mongoose.Schema({
   },
   currentMonth: {
     type: String,
-    unique: true,
   },
   allExpenses: [
     {

@@ -41,7 +41,6 @@ export const resolvers = {
         return "errMessage";
       }
       if (obj.allMonths) {
-        console.log(obj);
         return "MonthExpArray";
       }
       return null;
@@ -100,11 +99,17 @@ export const resolvers = {
         })
         .catch((err) => ({ msg: error.msg })),
     getUser: (parent, { userId }) =>
-      User.findOne({userId})
+      User.findOne({ userId })
         .then((resolve) => {
-            return resolve;
+          return resolve;
         })
         .catch((err) => ({ msg: err.message })),
+    getMonthById: (parent, { monthId }) =>
+      Month.findById(monthId)
+        .then((response) => {
+          return response;
+        })
+        .catch((err) => ({ msg: err.errMessage })),
   },
   Mutation: {
     createUser: (parent, { userId, totalAmount, cashPrice }) =>
@@ -180,7 +185,6 @@ export const resolvers = {
         .then((response) => {
           Month.findById(month)
             .then((currentMonth) => {
-              console.log(currentMonth);
               if (!paidByCash) {
                 if (expType === "credit") {
                   currentMonth.currentAmount += amount;
@@ -220,10 +224,11 @@ export const resolvers = {
         .then(async (response) => {
           const currentUserId = response.user;
           var totalAmountDeleted = 0;
+          let savingsAmount = 0;
           await User.findById(currentUserId)
             .then(async (currentUser) => {
-              currentUser.totalAmount -= response.totalAmount;
-              currentUser.savings -= response.totalAmount;
+              // currentUser.totalAmount -= response.totalAmount;
+              // currentUser.savings -= response.totalAmount;
               var monthInd;
               currentUser.totalExpenses.forEach((val, ind) => {
                 if (val === _id) {
@@ -234,23 +239,45 @@ export const resolvers = {
               await response.allExpenses.forEach((val) => {
                 Expense.findById(val)
                   .then((currentExpense) => {
-                    totalAmountDeleted += currentExpense.amount;
+                    if (currentExpense.expType === "credit") {
+                      savingsAmount += currentExpense.amount;
+                    } else {
+                      totalAmountDeleted += currentExpense.amount;
+                    }
                     if (currentExpense.paidByCash) {
                       currentUser.cashPrice += currentExpense.amount;
                     }
                   })
                   .catch((err) => ({ msg: err.message }));
                 Expense.findByIdAndRemove(val)
-                  .then((response) => console.log("removed-expenses..."))
+                  .then((_response) => {
+                    console.log(
+                      "totalAmountDeleted:",
+                      totalAmountDeleted,
+                      savingsAmount
+                    );
+                    console.log(
+                      "before",
+                      `savings: ${currentUser.savings}, totalAmount: ${currentUser.totalAmount}`
+                    );
+                    console.log(
+                      "totalAmount other than expenses:",
+                      response.totalAmount
+                    );
+                    currentUser.expenses -= totalAmountDeleted;
+                    currentUser.savings += totalAmountDeleted - savingsAmount;
+                    currentUser.totalAmount -= savingsAmount;
+                    currentUser.savings -= response.totalAmount - savingsAmount;
+                    currentUser.totalAmount -=
+                      response.totalAmount - savingsAmount;
+                    console.log(
+                      "after",
+                      `savings: ${currentUser.savings}, totalAmount: ${currentUser.totalAmount}`
+                    );
+                    currentUser.save();
+                  })
                   .catch((err) => ({ msg: err.message }));
               });
-              //have to find an ethical way to solve this issue
-              setTimeout(() => {
-                console.log("totalAmountDeleted:", totalAmountDeleted);
-                currentUser.expenses -= totalAmountDeleted;
-                currentUser.savings += totalAmountDeleted;
-                currentUser.save();
-              }, 1000);
             })
             .catch((err) => ({ msg: err.message }));
           return response;
@@ -261,13 +288,19 @@ export const resolvers = {
         .then((response) => {
           const currentMonthId = response.month;
           const paidByCash = response.paidByCash;
+          const isCredit = response.expType === "credit";
           Month.findById(currentMonthId)
             .then((currentMonth) => {
               const currentUserId = currentMonth.user;
               User.findById(currentUserId)
                 .then((currentUser) => {
-                  currentUser.expenses -= response.amount;
-                  currentUser.savings += response.amount;
+                  if (isCredit) {
+                    currentUser.savings -= response.amount;
+                    currentUser.totalAmount -= response.amount;
+                  } else {
+                    currentUser.expenses -= response.amount;
+                    currentUser.savings += response.amount;
+                  }
                   if (paidByCash) {
                     currentUser.cashPrice += response.amount;
                   }
@@ -275,8 +308,13 @@ export const resolvers = {
                 })
                 .catch((err) => ({ msg: err.message }));
               if (!paidByCash) {
-                currentMonth.currentAmount += response.amount;
-                currentMonth.amountSpent -= response.amount;
+                if (isCredit) {
+                  currentMonth.currentAmount -= response.amount;
+                  currentMonth.totalAmount -= response.amount;
+                } else {
+                  currentMonth.currentAmount += response.amount;
+                  currentMonth.amountSpent -= response.amount;
+                }
                 currentMonth.amountSaved =
                   currentMonth.totalAmount - currentMonth.amountSpent;
               }

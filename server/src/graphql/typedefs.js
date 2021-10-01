@@ -5,6 +5,7 @@ export const typeDefs = gql`
     getAllMonths(userId: ID!): allMonthsResult
     getAllExpenses(monthId: ID!): allExpensesResult
     getUser(userId: ID!): userResult
+    getMonthById(monthId: ID!): monthResult
   }
   type User {
     _id: ID
@@ -34,6 +35,7 @@ export const typeDefs = gql`
     dateOfPurchase: String
     Note: String
     badChoice: Boolean
+    paidByCash: Boolean
     month: ID!
   }
   type errMessage {

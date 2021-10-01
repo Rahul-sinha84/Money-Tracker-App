@@ -4,7 +4,8 @@
   "description": "",
   "main": "start.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon start.js"
   },
   "author": "",
   "license": "ISC",
@@ -14,5 +15,8 @@
     "esm": "^3.2.25",
     "express": "^4.17.1",
     "mongoose": "^5.11.14"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
   }
 }

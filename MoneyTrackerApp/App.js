@@ -1,6 +1,5 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import {StyleSheet, Text, SafeAreaView, View} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createStackNavigator} from '@react-navigation/stack';
@@ -14,13 +13,8 @@ import CreateExpenseScreen from './src/screens/createExpenseScreen';
 import WelcomeScreen from './src/screens/WelcomeScreen';
 import UserProfileScreen from './src/screens/userProfileScreen';
 import {connect} from 'react-redux';
-import {
-  setLoginStatus,
-  setUserData,
-  setAuthenticationMethod,
-} from './src/redux/actions';
 import EditExpenseScreen from './src/screens/EditExpenseScreen';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const Tabs = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -40,33 +34,48 @@ const ofMonthlyExpenses = () => (
 );
 
 const afterLogin = () => (
-  <Tabs.Navigator>
-    <Tabs.Screen name="HomeScreen" component={HomeScreen} />
-    <Tabs.Screen name="ofMonthlyExpenses" component={ofMonthlyExpenses} />
-    <Tabs.Screen name="UserProfileScreen" component={UserProfileScreen} />
-    {/* <Tabs.Screen name="CreateUserScreen" component={CreateUserScreen} /> */}
-    {/* <Tabs.Screen name="CreateMonthScreen" component={CreateMonthScreen} />
-    <Tabs.Screen name="EditMonthScreen" component={EditMonthScreen} />
-    <Tabs.Screen name="CreateExpenseScreen" component={CreateExpenseScreen} /> */}
+  <Tabs.Navigator
+    screenOptions={({route}) => ({
+      tabBarIcon: ({focused, color, size}) => {
+        var iconName;
+        if (route.name === 'HomeScreen') {
+          iconName = 'home';
+        } else if (route.name === 'ofMonthlyExpenses') {
+          iconName = 'wallet';
+        } else {
+          iconName = 'account-box';
+        }
+        return (
+          <Icon
+            name={iconName}
+            size={30}
+            style={{marginTop: 8}}
+            color={focused ? '#000' : '#999'}
+          />
+        );
+      },
+    })}>
+    <Tabs.Screen
+      options={{title: ''}}
+      name="HomeScreen"
+      component={HomeScreen}
+    />
+    <Tabs.Screen
+      options={{title: ''}}
+      name="ofMonthlyExpenses"
+      component={ofMonthlyExpenses}
+    />
+    <Tabs.Screen
+      options={{title: ''}}
+      name="UserProfileScreen"
+      component={UserProfileScreen}
+    />
   </Tabs.Navigator>
 );
 
 const App = ({userData}) => {
   return (
     <NavigationContainer>
-      {/* <Tabs.Navigator>
-        <Tabs.Screen name="HomeScreen" component={HomeScreen} />
-        <Tabs.Screen name="ExpenseScreen" component={ExpenseScreen} />
-        <Tabs.Screen name="MonthScreen" component={MonthScreen} />
-        <Tabs.Screen name="CreateUserScreen" component={CreateUserScreen} />
-        <Tabs.Screen name="CreateMonthScreen" component={CreateMonthScreen} />
-        <Tabs.Screen name="EditMonthScreen" component={EditMonthScreen} />
-        <Tabs.Screen
-          name="CreateExpenseScreen"
-          component={CreateExpenseScreen}
-        />
-        <Tabs.Screen name="Welcome" component={WelcomeScreen} />
-      </Tabs.Navigator> */}
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
@@ -96,12 +105,5 @@ const App = ({userData}) => {
 const mapStateToProps = state => ({
   userData: state.userAuthenticationStore,
 });
-const ActionCreators = Object.assign({
-  setLoginStatus,
-  setUserData,
-  setAuthenticationMethod,
-});
 
 export default connect(mapStateToProps)(App);
-
-const styles = StyleSheet.create({});
